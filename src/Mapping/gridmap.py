@@ -26,6 +26,8 @@ For more information, please refer to <http://unlicense.org/>
 
 @author: Josiah Walker
 """
+import cv2
+import glob
 import numpy,random
 from BlockSparseMatrix import BlockSparseMatrix
 from BresenhamAlgorithms import BresenhamLine,BresenhamTriangle,BresenhamPolygon
@@ -60,7 +62,7 @@ class GridMap:
         #generate the angle positions (change angleUpdates for more accurate approximation)
         angleUpdates = 4
         thetas = []
-        for i in xrange(angleUpdates-1):
+        for i in range(angleUpdates-1):
             thetas.append(position[2] + i*sensor["spread"]/angleUpdates - sensor["spread"]/2. + sensorangle)
         thetas.append(position[2] + sensor["spread"]/2. + sensorangle)
         
@@ -85,7 +87,7 @@ class GridMap:
         hitVals = BresenhamLine(positions[1],positions[2])
         solidVal = sensor["phitoccupied"]
         startpt = 0
-        for i in xrange(1,len(positions)-1):
+        for i in range(1,len(positions)-1):
             hitVals = BresenhamLine(positions[i],positions[i+1])
             solidVal = sensor["phitoccupied"]
             for h in hitVals[startpt:]:
@@ -113,9 +115,9 @@ class GridMap:
         bottomright = numpy.round(numpy.array(bottomright)*self._scale).astype(numpy.int64)
         #fill in the output
         result = numpy.zeros((bottomright[0]-topleft[0],bottomright[1]-topleft[1]))
-        for i in xrange(topleft[0],bottomright[0]):
+        for i in range(topleft[0],bottomright[0]):
             ival = numpy.round(i).astype(numpy.int64)
-            for j in xrange(topleft[1],bottomright[1]):
+            for j in range(topleft[1],bottomright[1]):
                 jval = numpy.round(j).astype(numpy.int64)
                 result[i-topleft[0],j-topleft[1]] = self._map[ival,jval]
         return result
@@ -153,17 +155,17 @@ if __name__ == '__main__':
     #this is the number of steps along each part of the tour
     divs =100
     vals = []
-    for i in xrange(len(tour)-1):
+    for i in range(len(tour)-1):
         
         
-        for j in xrange(divs):
+        for j in range(divs):
             position = numpy.array(tour[i])*(1.-j/float(divs))+numpy.array(tour[(i+1)%len(tour)])*(j/float(divs))
             
             p = position[:2]
             a = -position[2]+numpy.pi
             offset = numpy.array([numpy.sin(a),numpy.cos(a)])*20.
             
-            for k in xrange(4):
+            for k in range(4):
                 
                 #simulate each of the sonar sensor sweeps and see if we hit anything.
                 sensor = SonarSensor
@@ -173,7 +175,7 @@ if __name__ == '__main__':
                 baseB = numpy.array([numpy.cos(thetamax),numpy.sin(thetamax)])
                 baseC = numpy.array([numpy.cos(thetamin),numpy.sin(thetamin)])
                 hit = False
-                for distance in xrange(int(sensor["range"])):
+                for distance in range(int(sensor["range"])):
                     B = numpy.round(baseB*distance + position[:2]).astype(numpy.int32)
                     C = numpy.round(baseC*distance + position[:2]).astype(numpy.int32)
                     
@@ -193,7 +195,7 @@ if __name__ == '__main__':
                     vals.append(time.time()-t0)
             
             if makevideo: #save out png's for the video
-                fname = '_tmp%05d.png'%(i*divs+j)
+                fname = 'pics/_tmp%05d.png'%(i*divs+j)
                 tl = (95,95)
                 print (i*divs+j)
                 robot = (numpy.array([p+offset,p-offset,p+numpy.array([-offset[1],offset[0]])])*gridScale-numpy.array(tl)*gridScale).astype(numpy.int64)
@@ -202,8 +204,21 @@ if __name__ == '__main__':
                     emap[cell[0],cell[1]] = 120
                 pyplot.imsave(fname,emap)
                 pyplot.clf()
+                
+                img_array = []
+                for filename in glob.glob('c:/Users/jluka/Coding/VS Code/Python/Random/pyrover/pics/*.png'):
+                    img = cv2.imread(filename)
+                    height, width, layers = img.shape
+                    size = (width,height)
+                    img_array.append(img)
+                    os.remove()
                     
-    print "Mean Sensor Update Time:", numpy.mean(vals)
+                out = cv2.VideoWriter('project.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+                for i in range(len(img_array)):
+                    out.write(img_array[i])
+                out.release()
+                    
+    print ("Mean Sensor Update Time:"), numpy.mean(vals)
     
     if makevideo: #convert png's to video
         #recent ubuntu versions use avconv

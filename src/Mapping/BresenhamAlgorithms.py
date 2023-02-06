@@ -36,11 +36,11 @@ def BresenhamLine(A,B):
     """
     if A[0] == B[0]: #if A and B share the same X coord, draw a straight line in Y
         increment =  1 if B[1] >= A[1] else -1 #decide whether to draw forwards or backwards
-        return [(A[0],i) for i in xrange(A[1],B[1]+increment,increment)]
+        return [(A[0],i) for i in range(A[1],B[1]+increment,increment)]
             
     elif A[1] == B[1]: #if A and B share the same Y coord, draw a straight line in X
         increment =  1 if B[0] >= A[0] else -1 #decide whether to draw forwards or backwards
-        return [(i,A[1]) for i in xrange(A[0],B[0]+increment,increment)]
+        return [(i,A[1]) for i in range(A[0],B[0]+increment,increment)]
     
     else: #this draws a diagonal line
         incrementx = 1 if B[0] >= A[0] else -1 #set the direction of line drawing
@@ -51,7 +51,7 @@ def BresenhamLine(A,B):
         slope = A-B #calculate slope - assuming A and B are numpy arrays
         slope = abs(slope[1]/float(slope[0]))
         error = 0.0 #initialise Y error counter
-        for i in xrange(A[0],B[0]+incrementx,incrementx): #for all X values, step forward in X
+        for i in range(A[0],B[0]+incrementx,incrementx): #for all X values, step forward in X
             result.append((i,yval))
             error += slope
             while error >= 0.5: #while the Y error is too large, step forward in Y
@@ -68,7 +68,7 @@ def BresenhamBorder(A,B):
     """
     if A[0] == B[0]: #if A and B share the same X coord, draw a straight line in Y
         increment =  1 if B[1] >= A[1] else -1
-        return [(A[0],i) for i in xrange(A[1],B[1]+increment,increment)]
+        return [(A[0],i) for i in range(A[1],B[1]+increment,increment)]
         
     elif A[1] == B[1]: #we're screwed - we can only return one Y value
         return [numpy.round((A+B)/2).astype(numpy.int32)]
@@ -79,7 +79,7 @@ def BresenhamBorder(A,B):
         slope = A-B
         slope = slope[0]/float(slope[1])*incrementy
         xvals = numpy.round(A[0] + slope*numpy.arange(0.,abs(A[1]-B[1])+1,1.)).astype(numpy.int32)
-        return [(xvals[i], y) for i,y in enumerate(xrange(A[1],B[1]+incrementy,incrementy))]
+        return [(xvals[i], y) for i,y in enumerate(range(A[1],B[1]+incrementy,incrementy))]
 
 def BresenhamPolygon(vertices):
     """
@@ -89,14 +89,14 @@ def BresenhamPolygon(vertices):
     """
     #put the largest value at the head of the list:
     maxvert = 0
-    for i in xrange(len(vertices)):
+    for i in range(len(vertices)):
         if vertices[i][1] > vertices[maxvert][1]:
             maxvert = i
     
     vertices = vertices[maxvert:] + vertices[:maxvert]
     #split the list in to two sides based on max->min paths
     minvert = 0
-    for i in xrange(len(vertices)):
+    for i in range(len(vertices)):
         if vertices[i][1] < vertices[minvert][1]:
             minvert = i
     #skip everything of equal Y height on the top
@@ -106,7 +106,7 @@ def BresenhamPolygon(vertices):
     side1 = vertices[start:minvert+1]
     #create the "left" border
     l = BresenhamBorder(side1[0],side1[1])
-    for i in xrange(1,len(side1)-1):
+    for i in range(1,len(side1)-1):
         l += BresenhamBorder(side1[i],side1[i+1])[1:]
     
     #skip everything of equal Y height on the bottom
@@ -117,14 +117,14 @@ def BresenhamPolygon(vertices):
     side2 = [vertices[0]] + side2
     #create the "right" border
     r = BresenhamBorder(side2[0],side2[1])
-    for i in xrange(1,len(side2)-1):
+    for i in range(1,len(side2)-1):
         r += BresenhamBorder(side2[i],side2[i+1])[1:]
     
     #do horizontal scans and save all the cell locations in the triangle
     result = []
-    for i in xrange(len(l)):
+    for i in range(len(l)):
         increment = 1 if r[i][0] >= l[i][0] else -1 
-        result += [(j,l[i][1]) for j in xrange(l[i][0],r[i][0]+increment,increment)]
+        result += [(j,l[i][1]) for j in range(l[i][0],r[i][0]+increment,increment)]
     return result
 
 def BresenhamTriangle(A,B,C):

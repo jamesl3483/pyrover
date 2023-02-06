@@ -46,7 +46,7 @@ class BlockSparseMatrix:
             k2 = (int(key[0]%self.blocksize[0]),int(key[1]%self.blocksize[1]))
             return self.blocks[k][k2]
     
-    def __setitem__(self, key, item):'
+    def __setitem__(self, key, item):
         #use a dictionary key to see if the part of the matrix we want is available
         k = (int(key[0]/self.blocksize[0]),int(key[1]/self.blocksize[1]))
         
